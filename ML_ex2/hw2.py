@@ -195,7 +195,27 @@ class DecisionNode:
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # save the unique values of the given feature and store those rows in the dictionery
+        unique_values = np.unique(self.data[:, feature])
+        for val in unique_values:
+            groups[val] = self.data[self.data[:,feature] == val] 
+        
+        # calculate the overall uncertainty
+        overall_impurity = self.impurity_func(self.data)
+        # calculate the weighted-sum of the children impurity
+        children_impurity = 0.0
+        size = len(self.data)
+        for val,subset in groups.items():
+            weight = len(subset) / size
+            children_impurity += weight * self.impurity_func(subset)
+        goodness = 0
+        if not self.gain_ratio:
+            goodness = overall_impurity - children_impurity
+        else:
+            for val,subset in groups.items():
+                weight = len(subset) / size
+                goodness += calc_entropy(subset) * weight
+        
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
