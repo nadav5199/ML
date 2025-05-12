@@ -152,7 +152,12 @@ class DecisionNode:
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # count the labels
+        labels = self.data[:,-1]
+        # check how many unique label and how many occurences for each
+        unique_labels, count = np.unique(labels,return_counts=True)
+        # save the label with the highest count
+        pred = unique_labels[np.argmax(count)]
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
