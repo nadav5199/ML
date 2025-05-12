@@ -76,7 +76,17 @@ def calc_gini(data):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    # if the df is empty return 0
+    if data.shape[0] == 0:
+        return 0.0
+    # count the labels
+    labels = data[:,-1]
+    # substract duplicates from the count
+    _,count = np.unique(labels,return_counts=True)
+    # save the frequency of each property
+    frequency = count / len(labels)
+    # calculate the gini value
+    gini = 1 - np.sum(np.square(frequency)) 
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -96,7 +106,18 @@ def calc_entropy(data):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    # same as in gini
+    # if the df is empty return 0
+    if data.shape[0] == 0:
+        return 0.0
+    # count the labels
+    labels = data[:,-1]
+    # substract duplicates from the count
+    _,count = np.unique(labels,return_counts=True)
+    # save the frequency of each property
+    frequency = count / len(labels)
+    # calculate the entropy
+    entropy = np.sum([-freq * np.log2(freq) for freq in frequency if freq > 0])
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
