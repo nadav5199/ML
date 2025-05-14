@@ -262,7 +262,63 @@ class DecisionNode:
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # edge cases
+        # if we reached max depth
+        if self.depth >= self.max_depth:
+            self.terminal = True
+            return
+        # if nothing to split, set as leaf
+        labels = self.data[:,-1]
+        if np.unique(labels) == 1:
+            self.terminal = True
+            return 
+        # find the best split
+        N = self.data[1] - 1 # the amout of features in our DB without the labels
+        best_feature, best_goodness = -1 , -np.inf
+        best_groups = None
+
+        for i in range(N):
+            goodness, group = self.goodness_of_split(i)
+            if goodness > best_goodness:
+                best_goodness = goodness
+                best_groups = group
+                best_feature = i
+        # if dont have an improvment set as leaf
+        if best_goodness <= 0 or best_feature == -1:
+            self.terminal = True
+            return 
+        # post pruning
+        if self.chi != 1:
+            # compute X^2 
+            unique_labels, counts = np.unique(labels,return_counts=True)
+            labels_count = dict(zip(unique_labels,counts))
+
+            chi = 0.0
+
+            for subset in best_groups.values():
+                sample_count = len(subset)
+                for lbl, cnt in labels_count:
+                    expected = (sample_count * cnt) / N
+                    observed = np.sum(subset[:,-1] == lbl)
+
+                    if expected > 0:
+                        chi += np.square(observed - expected) / expected
+
+            deg_of_freedom = max(len(best_groups) - 1,1) # make sure it is not 0
+            if deg_of_freedom in chi_table:
+                crit = chi[deg_of_freedom][self.chi]
+                if chi < crit:
+                    self.terminal = True
+                    return
+            
+        # create the children
+        self.feature = best_feature
+        for val, subset in best_groups.items():
+            child = DecisionNode(data= subset, impurity_func=self.impurity_func, feature=-1, depth=self.depth + 1,
+                                  chi=self.chi, max_depth=self.max_depth, gain_ratio=self.gain_ratio)
+            self.add_child(child, val)
+            
+
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
