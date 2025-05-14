@@ -239,7 +239,14 @@ class DecisionNode:
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        #  if leaf node or didn't split 
+        if self.feature == -1:
+            self.feature_importance = 0.0
+            return
+        gos,_ = self.goodness_of_split(self.feature)
+        weight = len(self.data) / n_total_sample
+        self.feature_importance = gos * weight
+        return 
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
