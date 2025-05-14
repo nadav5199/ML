@@ -203,18 +203,23 @@ class DecisionNode:
         # calculate the overall uncertainty
         overall_impurity = self.impurity_func(self.data)
         # calculate the weighted-sum of the children impurity
-        children_impurity = 0.0
         size = len(self.data)
-        for val,subset in groups.items():
-            weight = len(subset) / size
-            children_impurity += weight * self.impurity_func(subset)
-        goodness = 0
         if not self.gain_ratio:
-            goodness = overall_impurity - children_impurity
-        else:
+            child_impurity = 0.0
             for val,subset in groups.items():
                 weight = len(subset) / size
-                goodness += calc_entropy(subset) * weight
+                child_impurity += weight * self.impurity_func(subset)
+            goodness = overall_impurity - child_impurity
+        else:
+            split_info = 0.0
+            for val,subset in groups.items():
+                weight = len(subset) / size
+                info_gain = calc_entropy(subset)
+                split_info += -(weight) * np.log2(weight)
+            if not split_info:
+                goodness = 0.0
+            else:
+                goodness = info_gain / split_info
         
         ###########################################################################
         #                             END OF YOUR CODE                            #
