@@ -336,6 +336,11 @@ class DecisionTree:
     # def depth(self):
     #     return self.root.depth
 
+    def get_max_depth(self):
+        if self.terminal or not self.children:
+            return self.depth
+        return max(self.get_max_depth(child) for child in self.children)
+
     def build_tree(self):
         """
         Build a tree using the given impurity measure and training dataset. 
@@ -422,9 +427,9 @@ class DecisionTree:
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        if not len(dataset): # if called on empty dataset
-            return accuracy
-
+        if len(dataset) == 0:
+            return 0
+        
         correct = 0
         # on every row in the dataset compare the real value to the predicted value
         for r in dataset:
@@ -497,7 +502,29 @@ def chi_pruning(X_train, X_test):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    def get_max_depth(node):
+        if node.terminal:
+            return node.depth
+        
+        max_depth = 0
+        for child in node.children:
+            depth = get_max_depth(child)
+            max_depth = max(max_depth, depth)
+        
+        return max_depth
+    
+    chi_values = [1, 0.5, 0.25, 0.1, 0.05, 0.0001]
+
+    for chi in chi_values:
+        tree = DecisionTree(X_train, impurity_func=calc_entropy, chi=chi, max_depth=10, gain_ratio=False)
+        tree.build_tree()
+
+        chi_training_acc.append(tree.calc_accuracy(X_train))
+        chi_validation_acc.append(tree.calc_accuracy(X_test))
+        depth.append(get_max_depth(tree.root))
+
+
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
