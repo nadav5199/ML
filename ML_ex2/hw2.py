@@ -460,7 +460,14 @@ def depth_pruning(X_train, X_validation):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        tree = DecisionTree(X_train, impurity_func=calc_entropy, max_depth=max_depth, gain_ratio=False)
+        tree.build_tree()
+
+        training_acc = tree.calc_accuracy(X_train)
+        validation_acc = tree.calc_accuracy(X_validation)
+
+        training.append(training_acc)
+        validation.append(validation_acc)
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
