@@ -465,7 +465,7 @@ def depth_pruning(X_train, X_validation):
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        tree = DecisionTree(X_train, impurity_func=calc_entropy, max_depth=max_depth, gain_ratio=False)
+        tree = DecisionTree(X_train, impurity_func=calc_entropy,feature=-1, chi=1, max_depth=max_depth, gain_ratio=False)
         tree.build_tree()
 
         training_acc = tree.calc_accuracy(X_train)
@@ -516,7 +516,7 @@ def chi_pruning(X_train, X_test):
     chi_values = [1, 0.5, 0.25, 0.1, 0.05, 0.0001]
 
     for chi in chi_values:
-        tree = DecisionTree(X_train, impurity_func=calc_entropy, chi=chi, max_depth=10, gain_ratio=False)
+        tree = DecisionTree(X_train, impurity_func=calc_entropy, feature=-1, chi=chi, max_depth=1000, gain_ratio=False)
         tree.build_tree()
 
         chi_training_acc.append(tree.calc_accuracy(X_train))
