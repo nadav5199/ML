@@ -422,7 +422,7 @@ class DecisionTree:
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        if not dataset: # if called on empty dataset
+        if not len(dataset): # if called on empty dataset
             return accuracy
 
         correct = 0
@@ -434,7 +434,7 @@ class DecisionTree:
             if observed == predicted:
                 correct += 1
 
-        accuracy = (correct * 100) / len(dataset) # change the corect values to accuracy
+        accuracy = (correct * 100.0) / len(dataset) # change the corect values to accuracy
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
