@@ -269,12 +269,12 @@ class DecisionNode:
             return
         # if nothing to split, set as leaf
         labels = self.data[:,-1]
-        if np.unique(labels) == 1:
+        if len(np.unique(labels)) == 1:
             self.terminal = True
             return 
         # find the best split
-        N = self.data[1] - 1 # the amout of features in our DB without the labels
-        best_feature, best_goodness = -1 , -np.inf
+        N = self.data.shape[1] - 1  # the amount of features in our DB without the labels
+        best_feature, best_goodness = -1, -np.inf
         best_groups = None
 
         for i in range(N):
@@ -297,16 +297,16 @@ class DecisionNode:
 
             for subset in best_groups.values():
                 sample_count = len(subset)
-                for lbl, cnt in labels_count:
-                    expected = (sample_count * cnt) / N
+                for lbl, cnt in labels_count.items():
+                    expected = (sample_count * cnt) / len(self.data)
                     observed = np.sum(subset[:,-1] == lbl)
 
                     if expected > 0:
                         chi += np.square(observed - expected) / expected
 
-            deg_of_freedom = max(len(best_groups) - 1,1) # make sure it is not 0
+            deg_of_freedom = max(len(best_groups) - 1, 1)  # make sure it is not 0
             if deg_of_freedom in chi_table:
-                crit = chi[deg_of_freedom][self.chi]
+                crit = chi_table[deg_of_freedom][self.chi]
                 if chi < crit:
                     self.terminal = True
                     return
@@ -314,7 +314,7 @@ class DecisionNode:
         # create the children
         self.feature = best_feature
         for val, subset in best_groups.items():
-            child = DecisionNode(data= subset, impurity_func=self.impurity_func, feature=-1, depth=self.depth + 1,
+            child = DecisionNode(data=subset, impurity_func=self.impurity_func, feature=-1, depth=self.depth + 1,
                                   chi=self.chi, max_depth=self.max_depth, gain_ratio=self.gain_ratio)
             self.add_child(child, val)
             
@@ -333,8 +333,8 @@ class DecisionTree:
         self.impurity_func = impurity_func # the impurity function to be used in the tree
         self.gain_ratio = gain_ratio #
         
-    def depth(self):
-        return self.root.depth
+    # def depth(self):
+    #     return self.root.depth
 
     def build_tree(self):
         """
@@ -348,7 +348,32 @@ class DecisionTree:
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # Create the root node with the training data
+        self.root = DecisionNode(
+            data=self.data, 
+            impurity_func=self.impurity_func, 
+            depth=0, 
+            chi=self.chi, 
+            max_depth=self.max_depth, 
+            gain_ratio=self.gain_ratio
+        )
+        
+        # Total number of samples
+        n_total_samples = len(self.data)
+
+        def _build_recursive(node):
+            node.split()
+            node.calc_feature_importance(n_total_samples)
+
+            if node.terminal:
+                return
+            
+            for child in node.children:
+                _build_recursive(child)
+
+        _build_recursive(self.root)
+
+
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
