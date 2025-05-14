@@ -392,7 +392,18 @@ class DecisionTree:
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # init the node as the root 
+        node = self.root
+
+        while not node.terminal:
+            feature_val = instance[node.feature] # the value of the feature in the given vector
+            if feature_val in node.children_values:
+                idx = node.children_values.index(feature_val)
+                node = node.children[idx]
+            else:
+                break
+
+        
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
