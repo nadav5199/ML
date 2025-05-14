@@ -422,7 +422,19 @@ class DecisionTree:
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        if not dataset: # if called on empty dataset
+            return accuracy
+
+        correct = 0
+        # on every row in the dataset compare the real value to the predicted value
+        for r in dataset:
+            observed = r[-1]
+            predicted = self.predict(r)
+            
+            if observed == predicted:
+                correct += 1
+
+        accuracy = (correct * 100) / len(dataset) # change the corect values to accuracy
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
