@@ -544,7 +544,13 @@ def count_nodes(node):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    # Check if node is None or if the tree object itself is None
+    if node is None:
+        return 0
+    
+    n_nodes = 1
+    for child in node.children:
+        n_nodes += count_nodes(child)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
