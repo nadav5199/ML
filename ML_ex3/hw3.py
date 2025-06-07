@@ -107,35 +107,35 @@ class conditional_independence():
         self.C = {0: 0.5, 1: 0.5}  # P(C=c)
 
         self.X_Y = {
-            (0, 0): None,
-            (0, 1): None,
-            (1, 0): None,
-            (1, 1): None
+            (0, 0): 0.1,  # P(X=0, Y=0)
+            (0, 1): 0.2,  # P(X=0, Y=1)
+            (1, 0): 0.2,  # P(X=1, Y=0)
+            (1, 1): 0.5   # P(X=1, Y=1)
         }  # P(X=x, Y=y)
 
         self.X_C = {
-            (0, 0): None,
-            (0, 1): None,
-            (1, 0): None,
-            (1, 1): None
+            (0, 0): 0.15,  # P(X=0, C=0)
+            (0, 1): 0.15,  # P(X=0, C=1)
+            (1, 0): 0.35,  # P(X=1, C=0)
+            (1, 1): 0.35   # P(X=1, C=1)
         }  # P(X=x, C=c)
 
         self.Y_C = {
-            (0, 0): None,
-            (0, 1): None,
-            (1, 0): None,
-            (1, 1): None
+            (0, 0): 0.15,  # P(Y=0, C=0)
+            (0, 1): 0.15,  # P(Y=0, C=1)
+            (1, 0): 0.35,  # P(Y=1, C=0)
+            (1, 1): 0.35   # P(Y=1, C=1)
         }  # P(Y=y, C=c)
 
         self.X_Y_C = {
-            (0, 0, 0): None,
-            (0, 0, 1): None,
-            (0, 1, 0): None,
-            (0, 1, 1): None,
-            (1, 0, 0): None,
-            (1, 0, 1): None,
-            (1, 1, 0): None,
-            (1, 1, 1): None,
+            (0, 0, 0): 0.05,   # P(X=0, Y=0, C=0)
+            (0, 0, 1): 0.05,   # P(X=0, Y=0, C=1)
+            (0, 1, 0): 0.10,   # P(X=0, Y=1, C=0)
+            (0, 1, 1): 0.10,   # P(X=0, Y=1, C=1)
+            (1, 0, 0): 0.10,   # P(X=1, Y=0, C=0)
+            (1, 0, 1): 0.10,   # P(X=1, Y=0, C=1)
+            (1, 1, 0): 0.25,   # P(X=1, Y=1, C=0)
+            (1, 1, 1): 0.25,   # P(X=1, Y=1, C=1)
         }  # P(X=x, Y=y, C=c)
 
     def is_X_Y_dependent(self):
@@ -148,7 +148,14 @@ class conditional_independence():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # Check if P(X,Y) = P(X) * P(Y) for all combinations
+        # If not equal, then X and Y are dependent
+        for x in [0, 1]:
+            for y in [0, 1]:
+                if abs(X_Y[(x, y)] - X[x] * Y[y]) > 1e-10:
+                    return True
+        
+        return False
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -166,7 +173,19 @@ class conditional_independence():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # Check if P(X,Y|C) = P(X|C) * P(Y|C) for all combinations
+        for c in [0, 1]:
+            if C[c] > 0:  # Avoid division by zero
+                for x in [0, 1]:
+                    for y in [0, 1]:
+                        prob_x_given_c = X_C[(x, c)] / C[c]
+                        prob_y_given_c = Y_C[(y, c)] / C[c]
+                        prob_xy_given_c = X_Y_C[(x, y, c)] / C[c]
+                        
+                        if abs(prob_xy_given_c - prob_x_given_c * prob_y_given_c) > 1e-10:
+                            return False
+        
+        return True
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
