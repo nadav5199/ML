@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Union
+import math
 
 def poisson_log_pmf(k: Union[int, np.ndarray], rate: float) -> Union[float, np.ndarray]:
     """
@@ -14,7 +15,7 @@ def poisson_log_pmf(k: Union[int, np.ndarray], rate: float) -> Union[float, np.n
     # TODO: Implement the function.                                           #
     ###########################################################################
     log_rate = np.log(rate)
-    log_factorial = np.log(np.vectorize(np.math.factorial)(k))
+    log_factorial = np.log(np.vectorize(math.factorial)(k))
 
     log_p = -rate + k * log_rate - log_factorial
     ###########################################################################
@@ -80,7 +81,17 @@ def get_poisson_log_likelihoods(samples, rates):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    samples = np.array(samples)
+    rates = np.array(rates)
+
+    # Pre compute constants
+    sum_of_samples = np.sum(samples)
+    num_samples = len(samples)
+    log_factorial_sum = np.sum(np.log(np.vectorize(math.factorial)(samples)))
+
+    # Calculate log-likelihood for each rate
+    likelihoods = (sum_of_samples * np.log(rates) - rates * num_samples - log_factorial_sum)
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
