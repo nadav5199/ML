@@ -13,7 +13,10 @@ def poisson_log_pmf(k: Union[int, np.ndarray], rate: float) -> Union[float, np.n
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    log_rate = np.log(rate)
+    log_factorial = np.log(np.vectorize(np.math.factorial)(k))
+
+    log_p = -rate + k * log_rate - log_factorial
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -30,7 +33,7 @@ def possion_analytic_mle(samples):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    mean = np.mean(samples)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -51,7 +54,16 @@ def possion_confidence_interval(lambda_mle, n, alpha=0.05):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    # Critical value for (1-alpha) confidence interval
+    z_critical = norm.ppf(1 - alpha/2)
+
+    standard_error = np.sqrt(lambda_mle / n)
+    
+    margin_of_error = z_critical * standard_error
+
+    # Calculate the confidence interval
+    lower_bound = lambda_mle - margin_of_error
+    upper_bound = lambda_mle + margin_of_error
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
