@@ -328,7 +328,8 @@ class MAPClassifier():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        self.ccd0 = ccd0
+        self.ccd1 = ccd1
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -346,13 +347,18 @@ class MAPClassifier():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        prob_0 = self.ccd0.get_instance_joint_prob(x)
+        prob_1 = self.ccd1.get_instance_joint_prob(x)
+
+        if prob_0 > prob_1:
+            pred = 0
+        else:
+            pred = 1
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
         return pred
 
-    
 def multi_normal_pdf(x, mean, cov):
     """
     Calculate multivariate normal desnity function under specified mean vector
@@ -369,7 +375,25 @@ def multi_normal_pdf(x, mean, cov):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    # Get the dimensionality
+    k = len(x)
+    
+    # Calculate difference vector
+    x_minus_mu = x - mean
+    
+    # Calculate determinant and inverse of covariance matrix
+    cov_det = np.linalg.det(cov)
+    cov_inv = np.linalg.inv(cov)
+    
+    # Calculate the quadratic form in the exponent
+    quadratic_form = np.dot(x_minus_mu.T, np.dot(cov_inv, x_minus_mu))
+    exponent = -0.5 * quadratic_form
+    
+    # Calculate normalization coefficient
+    coefficient = 1 / np.sqrt((2 * np.pi) ** k * cov_det)
+    
+    # Final PDF calculation
+    pdf = coefficient * np.exp(exponent)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -391,7 +415,33 @@ class MultiNormalClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # Store class value and dataset
+        self.class_value = class_value
+        self.dataset = dataset
+        
+        # Separate features from labels (last column contains class labels)
+        self.features = dataset[:, :-1]
+        self.labels = dataset[:, -1]
+        
+        # Calculate prior probability: P(Y=class_value)
+        self.prior = np.mean(self.labels == class_value)
+        
+        # Filter samples belonging to this class
+        class_mask = (self.labels == class_value)
+        class_features = self.features[class_mask]
+        
+        # Calculate mean vector for each feature
+        self.mean = np.mean(class_features, axis=0)
+        
+        # Calculate covariance matrix
+        self.cov = np.cov(class_features, rowvar=False)
+        
+        # Regularize covariance matrix to ensure numerical stability
+        eigenvalues = np.linalg.eigvals(self.cov)
+        min_eigenvalue = np.min(eigenvalues)
+        if min_eigenvalue <= 1e-6:
+            regularization = 1e-6 - min_eigenvalue + 1e-8
+            self.cov += np.eye(self.cov.shape[0]) * regularization
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -404,7 +454,7 @@ class MultiNormalClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        prior = self.prior
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -419,7 +469,7 @@ class MultiNormalClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        likelihood = multi_normal_pdf(x, self.mean, self.cov)
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -433,7 +483,9 @@ class MultiNormalClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        likelihood = self.get_instance_likelihood(x)
+        prior = self.get_prior()
+        joint_prob = likelihood * prior
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -456,7 +508,17 @@ def compute_accuracy(test_set, map_classifier):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    test_features = test_set[:, :-1]
+    true_labels = test_set[:, -1]
+
+    predictions = []
+    for i in range(len(test_features)):
+        pred = map_classifier.predict(test_features[i])
+        predictions.append(pred)
+    
+    predictions = np.array(predictions)
+
+    acc = np.mean(predictions == true_labels)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -490,7 +552,7 @@ class DiscreteNBClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        prior = self.prior
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -519,7 +581,9 @@ class DiscreteNBClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        likelihood = self.get_instance_likelihood(x)
+        prior = self.get_prior()
+        joint_prob = likelihood * prior
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
