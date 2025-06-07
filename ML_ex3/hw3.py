@@ -140,7 +140,7 @@ class conditional_independence():
 
     def is_X_Y_dependent(self):
         """
-        return True iff X and Y are depndendent
+        return True iff X and Y are depndependent
         """
         X = self.X
         Y = self.Y
@@ -162,7 +162,7 @@ class conditional_independence():
 
     def is_X_Y_given_C_independent(self):
         """
-        return True iff X_given_C and Y_given_C are indepndendent
+        return True iff X_given_C and Y_given_C are indepndependent
         """
         X = self.X
         Y = self.Y
@@ -206,7 +206,11 @@ def normal_pdf(x, mean, std):
     ###########################################################################
     # TODO: Implement the function.                                           #
     ###########################################################################
-    pass
+    # Calculate the normal PDF using the formula:
+    # p(x) = (1 / (std * sqrt(2*pi))) * exp(-0.5 * ((x - mean) / std)^2)
+    coefficient = 1 / (std * np.sqrt(2 * np.pi))
+    exponent = - ((x - mean) / std * 2) ** 2
+    p = coefficient * np.exp(exponent)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -228,7 +232,30 @@ class NaiveNormalClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # Store class value and dataset
+        self.class_value = class_value
+        self.dataset = dataset
+        
+        # Separate features from labels (last column contains class labels)
+        self.features = dataset[:, :-1]
+        self.labels = dataset[:, -1]
+        
+        # Calculate prior probability: P(Y=class_value)
+        self.prior = np.mean(self.labels == class_value)
+        
+        # Filter samples that belong to this class
+        class_mask = (self.labels == class_value)
+        class_features = self.features[class_mask]
+        
+        # Store number of features
+        self.num_features = class_features.shape[1]
+        
+        # Compute mean and standard deviation for each feature
+        self.means = np.mean(class_features, axis=0)
+        self.stds = np.std(class_features, axis=0)
+        
+        # Handle potential zero standard deviations 
+        self.stds = np.maximum(self.stds, 1e-10)
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -241,7 +268,7 @@ class NaiveNormalClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        prior = self.prior
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -256,7 +283,13 @@ class NaiveNormalClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # Initialize likelihood to 1 (we'll multiply probabilities)
+        likelihood = 1.0
+        
+        # For each feature, calculate the normal PDF and multiply to get joint likelihood
+        for i in range(self.num_features):
+            feature_likelihood = normal_pdf(x[i], self.means[i], self.stds[i])
+            likelihood *= feature_likelihood
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -270,7 +303,11 @@ class NaiveNormalClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        # Joint probability = Likelihood * Prior
+        # P(x, class) = P(x|class) * P(class)
+        likelihood = self.get_instance_likelihood(x)
+        prior = self.get_prior()
+        joint_prob = likelihood * prior
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
