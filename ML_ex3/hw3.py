@@ -539,7 +539,39 @@ class DiscreteNBClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        self.class_value = class_value
+        
+        # Extract features and class labels
+        X = dataset[:, :-1]  # features
+        y = dataset[:, -1]   # labels
+        
+        # Calculate prior probability
+        self.prior = np.sum(y == class_value) / len(y)
+        
+        # Get data for this specific class
+        class_indices = y == class_value
+        class_data = X[class_indices]
+        
+        # Store class count for Laplace smoothing
+        self.class_count = len(class_data)
+        
+        # Initialize storage for each feature
+        self.feature_value_counts = {}
+        self.feature_unique_values = {}
+        
+        # Process each feature
+        for feature_idx in range(X.shape[1]):
+            # Get all unique values for this feature (from entire dataset)
+            unique_vals = np.unique(X[:, feature_idx])
+            self.feature_unique_values[feature_idx] = unique_vals
+            
+            # Count occurrences of each value in this class
+            value_counts = {}
+            for value in unique_vals:
+                count = np.sum(class_data[:, feature_idx] == value)
+                value_counts[value] = count
+                
+            self.feature_value_counts[feature_idx] = value_counts
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
@@ -567,7 +599,18 @@ class DiscreteNBClassDistribution():
         ###########################################################################
         # TODO: Implement the function.                                           #
         ###########################################################################
-        pass
+        likelihood = 1.0
+        
+        # Calculate likelihood using naive Bayes independence assumption
+        for t in range(len(x)):
+            v = x[t]
+            # Get count for this value (0 if unseen)
+            count = self.feature_value_counts[t].get(v, 0)
+            # Get vocabulary size for this feature
+            num_values = len(self.feature_unique_values[t])
+            # Apply Laplace smoothing: P(X_t=v|Y=c) = (count + 1) / (n_c + |V_t|)
+            prob = (count + 1) / (self.class_count + num_values)
+            likelihood *= prob
         ###########################################################################
         #                             END OF YOUR CODE                            #
         ###########################################################################
